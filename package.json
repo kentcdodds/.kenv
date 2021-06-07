@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
+    "cloudinary": "^1.26.0",
     "dist-exiftool": "^10.53.0",
     "fs-extra": "^10.0.0",
     "kit": "file:../.kit",
