@@ -41,7 +41,7 @@ while (true) {
       ? []
       : await getFolders(chosenDirectory)
   lastSelection = await arg(
-    `Select directory in ${chosenDirectory}`,
+    `Select directory in ${chosenDirectory || '/'}`,
     [
       {name: '.', value: '.', description: '✅ Choose this directory'},
       !chosenDirectory
@@ -91,11 +91,8 @@ while (true) {
 cacheDb.data.lastChoice = chosenDirectory
 await cacheDb.write()
 
-const images = await arg({
-  placeholder: 'Drop the image(s) you want to upload',
-  drop: true,
-  ignoreBlur: true,
-})
+const images = await drop('Drop the image(s) you want to upload')
+
 for (const image of images) {
   const defaultName = path.parse(image.path).name
 
