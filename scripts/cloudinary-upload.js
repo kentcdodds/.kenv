@@ -76,7 +76,7 @@ while (true) {
   } else if (lastSelection === actions.CREATE_NEW) {
     const newFolderName = await arg(`What's the new folder name?`)
     const newDirectory = `${chosenDirectory}/${newFolderName}`
-    const result = await cloudinary.v2.api.create_folder(newDirectory)
+    await cloudinary.v2.api.create_folder(newDirectory)
     delete cacheDb.data.folders[chosenDirectory]
     chosenDirectory = newDirectory
   } else if (lastSelection === actions.REFRESH_CACHE) {
