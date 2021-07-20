@@ -13,7 +13,7 @@ const storyDir = await env(
   `Where do you want daily stories to be saved?`,
 )
 
-const story = await arg({placeholder: 'Write your story here'})
+const story = await textarea({placeholder: 'Write your story here'})
 
 const today = dateFns.format(new Date(), 'yyyy-MM-dd')
 const date = await arg({
