@@ -50,12 +50,10 @@ async function getProjects(parentDir) {
 }
 
 const choice = await arg('Which project?', async () => {
-  console.time('here')
   const choices = [
     ...(await getProjects(path.join(os.homedir(), 'code'))),
     ...(await getProjects(path.join(os.homedir(), 'Desktop'))),
   ]
-  console.timeEnd('here')
   return choices
 })
 
