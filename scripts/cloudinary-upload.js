@@ -93,15 +93,26 @@ await cacheDb.write()
 
 const images = await drop('Drop the image(s) you want to upload')
 
+let renameSome = true
+if (images.length > 1) {
+  const renameChoice = await arg('Do you want to rename any of these?', [
+    'yes',
+    'no',
+  ])
+  renameSome = renameChoice === 'yes'
+}
+
 for (const image of images) {
   const defaultName = path.parse(image.path).name
 
-  const name =
-    (await arg({
-      placeholder: `Name of this image?`,
-      hint: `Default is: "${defaultName}"`,
-    })) || defaultName
+  const name = renameSome
+    ? (await arg({
+        placeholder: `Name of this image?`,
+        hint: `Default is: "${defaultName}"`,
+      })) || defaultName
+    : defaultName
 
+  setPlaceholder(`Uploading ${name}`)
   const uploadedImage = await cloudinary.v2.uploader.upload(image.path, {
     public_id: name,
     overwrite: false,
