@@ -70,6 +70,7 @@ const categories = (
 )
   .split(',')
   .map(c => c.trim())
+  .filter(Boolean)
 
 const keywords = (
   await arg({
@@ -80,6 +81,10 @@ const keywords = (
 )
   .split(',')
   .map(c => c.trim())
+  .filter(Boolean)
+
+const filename = slugify(title, {decamelize: false})
+await exec(`open https://unsplash.com/s/photos/${filename}`)
 
 const unsplashPhotoInput = await arg({
   placeholder: `What's the unsplash photo?`,
@@ -132,7 +137,6 @@ const prettyMd = await prettier.format(md, {
   vueIndentScriptAndStyle: false,
 })
 
-const filename = slugify(title, {decamelize: false})
 const newFile = path.join(blogDir, `${filename}.mdx`)
 await writeFile(newFile, prettyMd)
 await edit(newFile)
