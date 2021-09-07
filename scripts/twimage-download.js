@@ -28,13 +28,25 @@ const response = await get(
 )
 
 const tweet = response.data
+console.log({tweet})
 
 const {
   geo,
   id,
   text,
   created_at,
-  extended_entities: {media: medias},
+  extended_entities: {media: medias} = {
+    media: [
+      {
+        type: 'photo',
+        media_url_https: await arg({
+          ignoreBlur: true,
+          input: `Can't find media. What's the URL for the media?`,
+          hint: `Media URL`,
+        }),
+      },
+    ],
+  },
 } = tweet
 
 const [latitude, longitude] = geo?.coordinates || []
@@ -65,7 +77,7 @@ for (const media of medias) {
   const filepath = path.join(
     baseOut,
     formattedDate.split('-').slice(0, 2).join('-'),
-    filename,
+    /\..+$/.test(filename) ? filename : `${filename}.jpg`,
   )
 
   await download(url, filepath)
