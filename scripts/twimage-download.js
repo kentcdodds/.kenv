@@ -41,7 +41,7 @@ const {
         type: 'photo',
         media_url_https: await arg({
           ignoreBlur: true,
-          input: `Can't find media. What's the URL for the media?`,
+          placeholder: `Can't find media. What's the URL for the media?`,
           hint: `Media URL`,
         }),
       },
@@ -85,7 +85,7 @@ for (const media of medias) {
   await ep.writeMetadata(
     filepath,
     {
-      ImageDescription: `${text} – ${twitterUrl}`,
+      ImageDescription: `${text.split('\n').join(' ')} – ${twitterUrl}`,
       Keywords: 'photos from tweets',
       DateTimeOriginal: formattedTimestamp,
       FileModifyDate: formattedTimestamp,

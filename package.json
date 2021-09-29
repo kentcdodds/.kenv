@@ -7,7 +7,6 @@
     "dist-exiftool": "^10.53.0",
     "filenamify": "^5.0.0",
     "fs-extra": "^10.0.0",
-    "kit": "file:../.kit",
     "metascraper": "^5.24.2",
     "node-exiftool": "^2.3.0",
     "prettier": "^2.3.2",
