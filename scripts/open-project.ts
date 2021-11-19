@@ -5,7 +5,7 @@ import path from 'path'
 import fs from 'fs'
 import os from 'os'
 
-const isDirectory = async filePath => {
+const isDirectory = async (filePath: string) => {
   try {
     const stat = await fs.promises.stat(filePath)
     return stat.isDirectory()
@@ -22,8 +22,8 @@ const isFile = async filePath => {
   }
 }
 
-async function getProjects(parentDir) {
-  const codeDir = (await ls(parentDir)).stdout.split('\n').filter(Boolean)
+async function getProjects(parentDir: string) {
+  const codeDir = ls(parentDir).stdout.split('\n').filter(Boolean)
   const choices = []
   for (const dir of codeDir) {
     let fullPath = dir

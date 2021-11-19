@@ -1,12 +1,13 @@
-// Menu: Shorten
-// Description: Shorten a given URL with a given short name via netlify-shortener
-// Shortcut: command option control s
+// Menu: Remix Shorten
+// Description: rmx: Shorten a given URL with a given short name via netlify-shortener
+// Shortcut: command option control r
 // Author: Kent C. Dodds
 // Twitter: @kentcdodds
 
-const dir = await env(
-  'SHORTEN_REPO_DIRECTORY',
-  'Where is your netlify-shortener repo directory?',
+import '@johnlindquist/kit'
+
+const dir = await env('RMX_SHORTEN_REPO_DIRECTORY', () =>
+  Promise.resolve('Where is your netlify-shortener repo directory?'),
 )
 
 const longURL = await arg(`What's the full URL?`)
@@ -16,7 +17,9 @@ const netlifyShortenerPath = path.join(
   dir,
   'node_modules/netlify-shortener/dist/index.js',
 )
-const {baseUrl} = JSON.parse(await readFile(path.join(dir, 'package.json')))
+const {baseUrl} = JSON.parse(
+  (await readFile(path.join(dir, 'package.json'))).toString(),
+)
 
 setPlaceholder(`Creating redirect: ${baseUrl}/${shortName} -> ${longURL}`)
 const result = exec(

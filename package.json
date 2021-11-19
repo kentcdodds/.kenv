@@ -1,9 +1,11 @@
 {
   "type": "module",
   "dependencies": {
+    "@johnlindquist/kit": "file:../.kit",
     "@metascraper/helpers": "^5.24.2",
     "@sindresorhus/slugify": "^2.1.0",
     "cloudinary": "^1.26.0",
+    "date-fns": "^2.25.0",
     "dist-exiftool": "^10.53.0",
     "filenamify": "^5.0.0",
     "fs-extra": "^10.0.0",
