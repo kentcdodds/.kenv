@@ -22,9 +22,7 @@ const { baseUrl } = JSON.parse(
 );
 
 setPlaceholder(`Creating redirect: ${baseUrl}/${shortName} -> ${longURL}`);
-const result = await execaCommand(
-  `node "${netlifyShortenerPath}" "${longURL}" "${shortName}"`
-);
+const result = await execa("node", [netlifyShortenerPath, longURL, shortName]);
 
 const stderr = String(result.stderr);
 const stdout = String(result.stdout);
