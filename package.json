@@ -12,6 +12,7 @@
     "metascraper": "^5.24.2",
     "node-exiftool": "^2.3.0",
     "prettier": "^2.3.2",
+    "project-name-generator": "^2.1.9",
     "yaml": "^1.10.2"
   }
 }

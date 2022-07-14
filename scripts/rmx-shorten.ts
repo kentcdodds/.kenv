@@ -1,6 +1,6 @@
 // Menu: Remix Shorten
 // Description: rmx: Shorten a given URL with a given short name via netlify-shortener
-// Shortcut: command option control r
+// Shortcut: command option control x
 // Author: Kent C. Dodds
 // Twitter: @kentcdodds
 
