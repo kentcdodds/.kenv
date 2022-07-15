@@ -4,6 +4,7 @@
     "@johnlindquist/kit": "file:../.kit",
     "@metascraper/helpers": "^5.24.2",
     "@sindresorhus/slugify": "^2.1.0",
+    "ansi-to-html": "^0.7.2",
     "cloudinary": "^1.26.0",
     "date-fns": "^2.25.0",
     "dist-exiftool": "^10.53.0",

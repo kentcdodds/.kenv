@@ -1,0 +1,118 @@
+
+    <script>
+    let u = new URL(window.location.href)
+    window.widgetId = u.searchParams.get("widgetId")
+    </script>
+    
+    <link rel="stylesheet" href="/Applications/Kit.app/Contents/Resources/app.asar/dist/style.css">
+    <style>
+    body {
+      
+
+      
+
+      pointer-events: none
+    }
+
+    * {pointer-events: all;}
+    .draggable {-webkit-app-region: drag;}
+  </style>
+    <script>
+      const { ipcRenderer } = require('electron');
+      window.ipcRenderer = ipcRenderer;
+      window.onSetState = (state) => {}
+    </script>
+
+    <script type="module">
+    import { createApp } from '/Applications/Kit.app/Contents/Resources/assets/petite-vue.es.js?module'
+
+    ipcRenderer.on('WIDGET_INIT', (event, state)=> {
+      console.log({state})
+      function Widget() {
+        return {
+          $template: '#widget-template',
+          state,
+          ...state,
+          setState(state) {
+            for (let [key, value] of Object.entries(state)) {
+              this[key] = value;
+            }
+          },
+          mounted() {
+            ipcRenderer.on('WIDGET_SET_STATE', (event, state)=> {
+              this.setState(state);
+              onSetState(state);
+            })
+          }
+        }
+      }
+
+      createApp({
+        Widget
+      }).mount()
+    })
+  </script>
+
+  <template id="widget-template">
+    
+<script>
+const logEl = document.querySelector("#log")
+
+const callback = ()=> {
+    logEl.lastChild.scrollIntoView()
+}
+const observer = new MutationObserver(callback)
+
+observer.observe(logEl, {childList: true})
+</script>
+<div class="font-mono text-xxs w-full h-full p-4">
+    <div id="log" v-html="log" class="max-h-full overflow-y-scroll whitespace-pre"/>
+</div>
+
+  </template>
+
+  <div id="__widget-container" v-scope="Widget()" @vue:mounted="mounted" class="flex justify-center items-center v-screen h-screen draggable"></div>
+
+  <script>
+
+    document.addEventListener("click", (event) => {
+      ipcRenderer.send("WIDGET_CLICK", {
+        targetId: event.target.id,
+        widgetId: window.widgetId,
+      })
+    })
+
+
+    document.addEventListener("input", (event) => {
+      ipcRenderer.send("WIDGET_INPUT", {
+        targetId: event.target.id,
+        value: event.target.value,
+        widgetId: window.widgetId,
+      })
+    })
+    </script>
+
+    <script>
+    let fitWidget = () => {
+      let firstChild = document.getElementById("__widget-container").firstElementChild;
+      let display = firstChild.style.display
+
+      firstChild.style.display = "inline-block"
+
+      let data = {
+        windowId: window.id,
+        width: firstChild.offsetWidth,
+        height: firstChild.offsetHeight,
+        widgetId: window.widgetId,
+      }
+
+      ipcRenderer.send("WIDGET_MEASURE", data)
+      firstChild.style.display = display
+    }
+    setTimeout(fitWidget, 2000)
+
+    ipcRenderer.on('WIDGET_FIT', (event, state)=> {
+      fitWidget()
+    })
+    </script>
+  
