@@ -17,7 +17,8 @@ const name =
     placeholder: `Default: ${defaultName}`,
   })) || defaultName;
 
-const quickRemixDir = `~/Desktop/quick-remix`;
+const quickRemixDir = `~/Desktop/locker/quick-remix`;
+await ensureDir(quickRemixDir);
 const projectPath = path.join(quickRemixDir, name);
 
 const type = await arg({
