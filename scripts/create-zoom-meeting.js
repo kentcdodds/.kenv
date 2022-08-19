@@ -68,6 +68,7 @@ await copy(join_url)
 let params = new URLSearchParams({
   action: 'join',
   confno: pmi,
+  pwd: encrypted_password,
 })
 
 // Opens Zoom using their URL protocol
