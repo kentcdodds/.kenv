@@ -7,18 +7,22 @@ const CONVERT_KIT_API_SECRET = await env('CONVERT_KIT_API_SECRET')
 const CONVERT_KIT_API_KEY = await env('CONVERT_KIT_API_KEY')
 
 const query = await arg('query')
-let url
+let urlString
 if (query.includes('@')) {
   const sub = await getConvertKitSubscriber(query)
   if (sub?.id) {
-    url = `https://app.convertkit.com/subscribers/${sub.id}`
+    urlString = `https://app.convertkit.com/subscribers/${sub.id}`
   }
 }
 
-if (!url) {
-  url = `https://app.convertkit.com/subscribers?utf8=%E2%9C%93&q=${query}&status=all`
+if (!urlString) {
+  const url = new URL(`https://app.convertkit.com/subscribers`)
+  url.searchParams.set('utf8', '✓')
+  url.searchParams.set('search', query)
+  url.searchParams.set('status', 'all')
+  urlString = url.toString()
 }
-exec(`open "${url}"`)
+exec(`open "${urlString}"`)
 
 async function getConvertKitSubscriber(email) {
   const url = new URL('https://api.convertkit.com/v3/subscribers')
