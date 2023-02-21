@@ -84,7 +84,7 @@ const keywords = (
   .filter(Boolean)
 
 const filename = slugify(title, {decamelize: false})
-await exec(`open https://unsplash.com/s/photos/${filename}`)
+// await exec(`open https://unsplash.com/s/photos/${filename}`)
 
 const unsplashPhotoInput = await arg({
   placeholder: `What's the unsplash photo?`,

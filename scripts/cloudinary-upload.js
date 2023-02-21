@@ -41,7 +41,10 @@ while (true) {
       ? []
       : await getFolders(chosenDirectory)
   lastSelection = await arg(
-    `Select directory in ${chosenDirectory || '/'}`,
+    {
+      placeholder: `Select directory in ${chosenDirectory || '/'}`,
+      ignoreBlur: true,
+    },
     [
       {name: '.', value: '.', description: '✅ Choose this directory'},
       !chosenDirectory

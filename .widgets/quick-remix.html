@@ -5,17 +5,211 @@
     </script>
     
     <link rel="stylesheet" href="/Applications/Kit.app/Contents/Resources/app.asar/dist/style.css">
+    <style type="text/css">
+/*
+
+Night Owl for highlight.js (c) Carl Baxter <carl@cbax.tech>
+
+An adaptation of Sarah Drasner's Night Owl VS Code Theme
+https://github.com/sdras/night-owl-vscode-theme
+
+Copyright (c) 2018 Sarah Drasner
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+*/
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  color: #d6deeb;
+}
+
+/* General Purpose */
+.hljs-keyword {
+  color: #c792ea;
+  font-style: italic;
+}
+.hljs-built_in {
+  color: #addb67;
+  font-style: italic;
+}
+.hljs-type {
+  color: #82aaff;
+}
+.hljs-literal {
+  color: #ff5874;
+}
+.hljs-number {
+  color: #F78C6C;
+}
+.hljs-regexp {
+  color: #5ca7e4;
+}
+.hljs-string {
+  color: #ecc48d;
+}
+.hljs-subst {
+  color: #d3423e;
+}
+.hljs-symbol {
+  color: #82aaff;
+}
+.hljs-class {
+  color: #ffcb8b;
+}
+.hljs-function {
+  color: #82AAFF;
+}
+.hljs-title {
+  color: #DCDCAA;
+  font-style: italic;
+}
+.hljs-params {
+  color: #7fdbca;
+}
+
+/* Meta */
+.hljs-comment {
+  color: #637777;
+  font-style: italic;
+}
+.hljs-doctag {
+  color: #7fdbca;
+}
+.hljs-meta {
+  color: #82aaff;
+}
+.hljs-meta-keyword {
+  color: #82aaff;
+}
+.hljs-meta-string {
+  color: #ecc48d;
+}
+
+/* Tags, attributes, config */
+.hljs-section {
+  color: #82b1ff;
+}
+.hljs-tag,
+.hljs-name,
+.hljs-builtin-name {
+  color: #7fdbca;
+}
+.hljs-attr {
+  color: #7fdbca;
+}
+.hljs-attribute {
+  color: #80cbc4;
+}
+.hljs-variable {
+  color: #addb67;
+}
+
+/* Markup */
+.hljs-bullet {
+  color: #d9f5dd;
+}
+.hljs-code {
+  color: #80CBC4;
+}
+.hljs-emphasis {
+  color: #c792ea;
+  font-style: italic;
+}
+.hljs-strong {
+  color: #addb67;
+  font-weight: bold;
+}
+.hljs-formula {
+  color: #c792ea;
+}
+.hljs-link {
+  color: #ff869a;
+}
+.hljs-quote {
+  color: #697098;
+  font-style: italic;
+}
+
+/* CSS */
+.hljs-selector-tag {
+  color: #ff6363;
+}
+
+.hljs-selector-id {
+  color: #fad430;
+}
+
+.hljs-selector-class {
+  color: #addb67;
+  font-style: italic;
+}
+
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+  color: #c792ea;
+  font-style: italic;
+}
+
+/* Templates */
+.hljs-template-tag {
+  color: #c792ea;
+}
+.hljs-template-variable {
+  color: #addb67;
+}
+
+/* diff */
+.hljs-addition {
+  color: #addb67ff;
+  font-style: italic;
+}
+
+.hljs-deletion {
+  color: #EF535090;
+  font-style: italic;
+}
+</style>
     <style>
     body {
       
 
+      
+          -webkit-user-select: none;
+          -webkit-app-region: drag;
       
 
       pointer-events: none
     }
 
     * {pointer-events: all;}
-    .draggable {-webkit-app-region: drag;}
+    .draggable {
+      
+          -webkit-app-region: drag;
+      
+    }
+
+    .drag-shadow {
+      box-shadow: inset 0 0 .75rem #000000;
+    }
   </style>
     <script>
       const { ipcRenderer } = require('electron');
@@ -53,6 +247,8 @@
     })
   </script>
 
+  
+
   <template id="widget-template">
     
 <script>
@@ -71,13 +267,85 @@ observer.observe(logEl, {childList: true})
 
   </template>
 
-  <div id="__widget-container" v-scope="Widget()" @vue:mounted="mounted" class="flex justify-center items-center v-screen h-screen draggable"></div>
+  <div id="__widget-container" v-scope="Widget()" @vue:mounted="mounted" class="overflow-auto flex justify-center items-center v-screen h-screen draggable"></div>
 
   <script>
 
     document.addEventListener("click", (event) => {
+      let {id = ""} = event.target.closest("*[id]")
       ipcRenderer.send("WIDGET_CLICK", {
-        targetId: event.target.id,
+        dataset: {
+          ...event.target.dataset
+        },
+        targetId: id,
+        widgetId: window.widgetId,
+      })
+    })
+
+    // add "mousedown" handler
+    document.addEventListener("mousedown", (event) => {
+      let {id = ""} = event.target.closest("*[id]")
+      ipcRenderer.send("WIDGET_MOUSE_DOWN", {
+        dataset: {
+          ...event.target.dataset
+        },
+        targetId: id,
+        widgetId: window.widgetId,
+      })
+    })
+
+    // document.addEventListener("dragstart", event => {
+    //   event.preventDefault()
+    //   event.dataTransfer.effectAllowed = "all";
+    //   event.dataTransfer.dropEffect = "move"
+    // })
+
+    let __widgetContainer = document.getElementById("__widget-container")
+    document.addEventListener("dragenter", event => {
+        // add tailwind inner drop shadow
+        console.log("dragenter")
+        __widgetContainer.classList.add("drag-shadow")
+        event.preventDefault()
+    })
+
+    document.addEventListener("dragend", event => {
+      // remove tailwind inner drop shadow
+      console.log("dragend")
+      __widgetContainer.classList.remove("drag-shadow")
+    })
+
+    document.addEventListener("dragleave", event => {
+      // remove tailwind inner drop shadow
+      console.log("dragleave")
+      __widgetContainer.classList.remove("drag-shadow")
+    })
+
+
+    document.addEventListener("dragover", event => {
+        event.dataTransfer.dropEffect = 'copy';
+        event.preventDefault()
+    })
+
+    // add "drop" handler
+    document.addEventListener("drop", (event) => {
+      __widgetContainer.classList.remove("drag-shadow")
+      event.preventDefault();
+      let {id = ""} = event.target.closest("*[id]")
+      // get the files from the event
+      let files = [];
+      let eFiles = event.dataTransfer.files;
+
+      Object.keys(eFiles).forEach((key) => {
+        if (eFiles[key]?.path) {
+          files.push(eFiles[key].path);
+        }
+      });
+      ipcRenderer.send("WIDGET_DROP", {
+        dataset: {
+          ...event.target.dataset,
+          files
+        },
+        targetId: id,
         widgetId: window.widgetId,
       })
     })
@@ -85,11 +353,16 @@ observer.observe(logEl, {childList: true})
 
     document.addEventListener("input", (event) => {
       ipcRenderer.send("WIDGET_INPUT", {
+        dataset: {
+          ...event.target.dataset
+        },
         targetId: event.target.id,
         value: event.target.value,
         widgetId: window.widgetId,
       })
     })
+
+
     </script>
 
     <script>
@@ -114,5 +387,6 @@ observer.observe(logEl, {childList: true})
     ipcRenderer.on('WIDGET_FIT', (event, state)=> {
       fitWidget()
     })
+
     </script>
   
