@@ -5,6 +5,7 @@
 // Twitter: @kentcdodds
 
 import path from 'path'
+import '@johnlindquist/kit'
 
 const cloudinaryCloudName = await env('CLOUDINARY_CLOUD_NAME')
 const cloudinaryKey = await env('CLOUDINARY_API_KEY')

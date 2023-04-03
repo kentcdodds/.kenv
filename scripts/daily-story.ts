@@ -4,6 +4,8 @@
 // Shortcut: command option control o
 // Twitter: @kentcdodds
 
+import '@johnlindquist/kit'
+
 const dateFns = await npm('date-fns')
 const filenamify = await npm('filenamify')
 

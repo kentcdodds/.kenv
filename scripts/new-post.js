@@ -4,6 +4,7 @@
 // Shortcut: command option control p
 // Twitter: @kentcdodds
 
+import '@johnlindquist/kit'
 const dateFns = await npm('date-fns')
 const prettier = await npm('prettier')
 const YAML = await npm('yaml')

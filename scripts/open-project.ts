@@ -4,6 +4,7 @@
 
 // Reminder: If the window isn't showing up, hit ⌘+0 from the main window to
 // bring it to the center
+import '@johnlindquist/kit'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'

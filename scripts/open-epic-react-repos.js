@@ -1,6 +1,7 @@
 // Menu: Open EpicReact Repos
 // Description: Open all the EpicReact Repos in VSCode
 
+import '@johnlindquist/kit'
 const repos = [
   'advanced-react-hooks',
   'advanced-react-patterns',

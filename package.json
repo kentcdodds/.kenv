@@ -10,12 +10,17 @@
     "filenamify": "^5.0.0",
     "fs-extra": "^10.0.0",
     "metascraper": "^5.24.2",
+    "music-metadata": "^8.1.4",
     "node-exiftool": "^2.3.0",
+    "node-id3": "^0.2.6",
     "prettier": "^2.3.2",
     "project-name-generator": "^2.1.9",
-    "yaml": "^1.10.2"
+    "shell-quote": "^1.8.0",
+    "yaml": "^1.10.2",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@johnlindquist/kit": "file:../.kit"
+    "@johnlindquist/kit": "file:../.kit",
+    "@types/shell-quote": "^1.7.1"
   }
 }

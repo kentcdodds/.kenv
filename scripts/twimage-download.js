@@ -4,6 +4,7 @@
 // Author: Kent C. Dodds
 // Twitter: @kentcdodds
 
+import '@johnlindquist/kit'
 import fs from 'fs'
 import {fileURLToPath, URL} from 'url'
 

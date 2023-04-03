@@ -3,6 +3,7 @@
 // Author: Kent C. Dodds
 // Twitter: @kentcdodds
 
+import '@johnlindquist/kit'
 const CONVERT_KIT_API_SECRET = await env('CONVERT_KIT_API_SECRET')
 const CONVERT_KIT_API_KEY = await env('CONVERT_KIT_API_KEY')
 

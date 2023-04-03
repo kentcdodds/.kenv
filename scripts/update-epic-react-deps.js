@@ -1,6 +1,8 @@
 // Menu: Update EpicReact deps
 // Description: Update all the dependencies in the epicreact workshop repos
 
+import '@johnlindquist/kit'
+
 const repos = [
   'advanced-react-hooks',
   'advanced-react-patterns',
