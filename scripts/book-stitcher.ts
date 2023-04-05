@@ -74,7 +74,6 @@ const specifiedTags = z
     artist: z.string(),
     copyright: z.string(),
     subtitle: z.string(),
-    albumArtist: z.string(),
     date: z.string(),
     userDefinedText: z.array(
       z.object({
@@ -124,17 +123,18 @@ await writeFile(
 )
 
 await execa(
-  '/opt/homebrew/bin/ffmpeg',
+  '/opt/homebrew/bin/ffmpeg', // path to ffmpeg executable
   // prettier-ignore
   [
-    '-y',
-    '-f', 'concat',
-    '-safe', '0',
-    '-i', filesListFile,
-    '-c', 'copy',
-    outputFilepath,
+    '-y', // overwrite output file if it exists
+    '-f', 'concat', // set input format to concatenated files
+    '-safe', '0', // allow unsafe file access
+    '-i', filesListFile, // path to a file containing a list of input files to concatenate
+    '-c:a', 'mp3', // set audio codec to mp3
+    '-b:a', '64k', // set audio bitrate to 64 kbps
+    outputFilepath, // path to the output file
   ],
-  {stdio: 'inherit'},
+  {stdio: 'inherit'}, // inherit standard I/O streams from parent process
 )
 
 const chapters = []
