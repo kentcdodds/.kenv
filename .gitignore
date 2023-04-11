@@ -1,3 +1,11 @@
+# Script Kit
+kenvs
+.scripts
+cache
+tmp
+db
+bin
+
 # Logs
 logs
 *.log

@@ -3,12 +3,23 @@
   "dependencies": {
     "@metascraper/helpers": "^5.24.2",
     "@sindresorhus/slugify": "^2.1.0",
+    "@svgr/core": "^7.0.0",
+    "@svgr/plugin-jsx": "^7.0.0",
+    "@svgr/plugin-prettier": "^7.0.0",
+    "@svgr/plugin-svgo": "^7.0.0",
     "ansi-to-html": "^0.7.2",
+    "bytes-formatter": "^21.6.12",
     "cloudinary": "^1.26.0",
     "date-fns": "^2.25.0",
     "dist-exiftool": "^10.53.0",
     "filenamify": "^5.0.0",
     "fs-extra": "^10.0.0",
+    "imagemin": "^8.0.1",
+    "imagemin-gifsicle": "^7.0.0",
+    "imagemin-jpeg-recompress": "^7.1.0",
+    "imagemin-jpegtran": "^7.0.0",
+    "imagemin-pngquant": "^9.0.2",
+    "imagemin-svgo": "^10.0.1",
     "metascraper": "^5.24.2",
     "music-metadata": "^8.1.4",
     "node-exiftool": "^2.3.0",
@@ -16,11 +27,17 @@
     "prettier": "^2.3.2",
     "project-name-generator": "^2.1.9",
     "shell-quote": "^1.8.0",
+    "svg-parser": "^2.0.4",
     "yaml": "^1.10.2",
     "zod": "^3.21.4"
   },
   "devDependencies": {
     "@johnlindquist/kit": "file:../.kit",
-    "@types/shell-quote": "^1.7.1"
+    "@types/imagemin": "^8.0.1",
+    "@types/imagemin-gifsicle": "^7.0.1",
+    "@types/imagemin-jpegtran": "^5.0.1",
+    "@types/imagemin-svgo": "^10.0.2",
+    "@types/shell-quote": "^1.7.1",
+    "@types/svg-parser": "^2.0.3"
   }
 }
