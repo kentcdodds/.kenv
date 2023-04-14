@@ -9,11 +9,10 @@ import Tesseract from 'tesseract.js'
 const clipboardImage = await clipboard.readImage()
 
 if (clipboardImage.byteLength) {
-  Tesseract.recognize(clipboardImage, 'eng', {
+  const {data} = await Tesseract.recognize(clipboardImage, 'eng', {
     logger: m => console.log(m),
-  }).then(({data: {text}}) => {
-    clipboard.writeText(text)
   })
+  clipboard.writeText(data.text)
 } else {
   let selectedFiles = await getSelectedFile()
   let filePaths: Array<string>
@@ -25,11 +24,10 @@ if (clipboardImage.byteLength) {
     filePaths = droppedFiles.map(file => file.path)
   }
   for (const filePath of filePaths) {
-    Tesseract.recognize(filePath, 'eng', {logger: m => console.log(m)}).then(
-      ({data: {text}}) => {
-        clipboard.writeText(text)
-      },
-    )
+    const {data} = await Tesseract.recognize(filePath, 'eng', {
+      logger: m => console.log(m),
+    })
+    clipboard.writeText(data.text)
   }
 }
 
