@@ -1,0 +1,402 @@
+
+    <script>
+    let u = new URL(window.location.href)
+    window.widgetId = u.searchParams.get("widgetId")
+    </script>
+    
+    <link rel="stylesheet" href="/Applications/Kit.app/Contents/Resources/app.asar/dist/style.css">
+    <style type="text/css">
+/*
+
+Night Owl for highlight.js (c) Carl Baxter <carl@cbax.tech>
+
+An adaptation of Sarah Drasner's Night Owl VS Code Theme
+https://github.com/sdras/night-owl-vscode-theme
+
+Copyright (c) 2018 Sarah Drasner
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+*/
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  color: #d6deeb;
+}
+
+/* General Purpose */
+.hljs-keyword {
+  color: #c792ea;
+  font-style: italic;
+}
+.hljs-built_in {
+  color: #addb67;
+  font-style: italic;
+}
+.hljs-type {
+  color: #82aaff;
+}
+.hljs-literal {
+  color: #ff5874;
+}
+.hljs-number {
+  color: #F78C6C;
+}
+.hljs-regexp {
+  color: #5ca7e4;
+}
+.hljs-string {
+  color: #ecc48d;
+}
+.hljs-subst {
+  color: #d3423e;
+}
+.hljs-symbol {
+  color: #82aaff;
+}
+.hljs-class {
+  color: #ffcb8b;
+}
+.hljs-function {
+  color: #82AAFF;
+}
+.hljs-title {
+  color: #DCDCAA;
+  font-style: italic;
+}
+.hljs-params {
+  color: #7fdbca;
+}
+
+/* Meta */
+.hljs-comment {
+  color: #637777;
+  font-style: italic;
+}
+.hljs-doctag {
+  color: #7fdbca;
+}
+.hljs-meta {
+  color: #82aaff;
+}
+.hljs-meta-keyword {
+  color: #82aaff;
+}
+.hljs-meta-string {
+  color: #ecc48d;
+}
+
+/* Tags, attributes, config */
+.hljs-section {
+  color: #82b1ff;
+}
+.hljs-tag,
+.hljs-name,
+.hljs-builtin-name {
+  color: #7fdbca;
+}
+.hljs-attr {
+  color: #7fdbca;
+}
+.hljs-attribute {
+  color: #80cbc4;
+}
+.hljs-variable {
+  color: #addb67;
+}
+
+/* Markup */
+.hljs-bullet {
+  color: #d9f5dd;
+}
+.hljs-code {
+  color: #80CBC4;
+}
+.hljs-emphasis {
+  color: #c792ea;
+  font-style: italic;
+}
+.hljs-strong {
+  color: #addb67;
+  font-weight: bold;
+}
+.hljs-formula {
+  color: #c792ea;
+}
+.hljs-link {
+  color: #ff869a;
+}
+.hljs-quote {
+  color: #697098;
+  font-style: italic;
+}
+
+/* CSS */
+.hljs-selector-tag {
+  color: #ff6363;
+}
+
+.hljs-selector-id {
+  color: #fad430;
+}
+
+.hljs-selector-class {
+  color: #addb67;
+  font-style: italic;
+}
+
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+  color: #c792ea;
+  font-style: italic;
+}
+
+/* Templates */
+.hljs-template-tag {
+  color: #c792ea;
+}
+.hljs-template-variable {
+  color: #addb67;
+}
+
+/* diff */
+.hljs-addition {
+  color: #addb67ff;
+  font-style: italic;
+}
+
+.hljs-deletion {
+  color: #EF535090;
+  font-style: italic;
+}
+</style>
+    <style>
+    body {
+      
+
+      
+          -webkit-user-select: none;
+          -webkit-app-region: drag;
+      
+
+      pointer-events: none
+    }
+
+    * {pointer-events: all;}
+    .draggable {
+      
+          -webkit-app-region: drag;
+      
+    }
+
+    *:not(.draggable) {
+      -webkit-app-region: no-drag;
+    }
+
+
+    .drag-shadow {
+      box-shadow: inset 0 0 .75rem #000000;
+    }
+  </style>
+    <script>
+      const { ipcRenderer } = require('electron');
+      window.ipcRenderer = ipcRenderer;
+      window.onSetState = (state) => {}
+    </script>
+
+    <script type="module">
+    import { createApp } from '/Applications/Kit.app/Contents/Resources/assets/petite-vue.es.js?module'
+
+    ipcRenderer.on('WIDGET_THEME', (event, theme) => {
+      Object.entries(theme).forEach(([key, value]) => {
+        document.documentElement.style.setProperty(key, value)
+      })
+    })
+
+    ipcRenderer.on('WIDGET_INIT', (event, state)=> {
+      console.log({state})
+      function Widget() {
+        return {
+          $template: '#widget-template',
+          state,
+          ...state,
+          setState(state) {
+            for (let [key, value] of Object.entries(state)) {
+              this[key] = value;
+            }
+          },
+          mounted() {
+            ipcRenderer.on('WIDGET_SET_STATE', (event, state)=> {
+              this.setState(state);
+              onSetState(state);
+            })
+          }
+        }
+      }
+
+      createApp({
+        Widget
+      }).mount()
+    })
+  </script>
+
+  
+
+  <template id="widget-template">
+    <div class="px-8 bg-bg-base text-text-base h-screen w-screen flex flex-col justify-center bg-opacity"><h2 id="🔐-authenticating-with-github">🔐 Authenticating with GitHub</h2>
+<h2 id="httpsgithubcomlogindevice"><a class="text-primary ring-0 ring-opacity-0 focus:ring-0 focus:ring-opacity-0 focus:outline-none outline-none"  href="https://github.com/login/device">https://github.com/login/device</a></h2>
+<p class="pt-2"/>
+Code copied to clipboard: <code class="text-primary font-bold">776D-D2B5</code>
+
+<ol class="text-sm pt-3 ml-4 mb-4">
+    <li>Paste the code on https://github.com/login/device</li>
+    <li>Click "Continue"</li>
+    <li>Click "Authorize"</li>
+    <li>Script Kit should automatically re-open</li>
+</ol>
+
+
+</div>
+  </template>
+
+  <div id="__widget-container" v-scope="Widget()" @vue:mounted="mounted" class="overflow-auto flex justify-center items-center v-screen h-screen draggable"></div>
+
+  <script>
+
+    document.addEventListener("click", (event) => {
+      let {id = ""} = event.target.closest("*[id]")
+      ipcRenderer.send("WIDGET_CLICK", {
+        dataset: {
+          ...event.target.dataset
+        },
+        targetId: id,
+        widgetId: window.widgetId,
+      })
+    })
+
+    // add "mousedown" handler
+    document.addEventListener("mousedown", (event) => {
+      let {id = ""} = event.target.closest("*[id]")
+      ipcRenderer.send("WIDGET_MOUSE_DOWN", {
+        dataset: {
+          ...event.target.dataset
+        },
+        targetId: id,
+        widgetId: window.widgetId,
+      })
+    })
+
+    // document.addEventListener("dragstart", event => {
+    //   event.preventDefault()
+    //   event.dataTransfer.effectAllowed = "all";
+    //   event.dataTransfer.dropEffect = "move"
+    // })
+
+    let __widgetContainer = document.getElementById("__widget-container")
+    document.addEventListener("dragenter", event => {
+        // add tailwind inner drop shadow
+        console.log("dragenter")
+        __widgetContainer.classList.add("drag-shadow")
+        event.preventDefault()
+    })
+
+    document.addEventListener("dragend", event => {
+      // remove tailwind inner drop shadow
+      console.log("dragend")
+      __widgetContainer.classList.remove("drag-shadow")
+    })
+
+    document.addEventListener("dragleave", event => {
+      // remove tailwind inner drop shadow
+      console.log("dragleave")
+      __widgetContainer.classList.remove("drag-shadow")
+    })
+
+
+    document.addEventListener("dragover", event => {
+        event.dataTransfer.dropEffect = 'copy';
+        event.preventDefault()
+    })
+
+    // add "drop" handler
+    document.addEventListener("drop", (event) => {
+      __widgetContainer.classList.remove("drag-shadow")
+      event.preventDefault();
+      let {id = ""} = event.target.closest("*[id]")
+      // get the files from the event
+      let files = [];
+      let eFiles = event.dataTransfer.files;
+
+      Object.keys(eFiles).forEach((key) => {
+        if (eFiles[key]?.path) {
+          files.push(eFiles[key].path);
+        }
+      });
+      ipcRenderer.send("WIDGET_DROP", {
+        dataset: {
+          ...event.target.dataset,
+          files
+        },
+        targetId: id,
+        widgetId: window.widgetId,
+      })
+    })
+
+
+    document.addEventListener("input", (event) => {
+      ipcRenderer.send("WIDGET_INPUT", {
+        dataset: {
+          ...event.target.dataset
+        },
+        targetId: event.target.id,
+        value: event.target.value,
+        widgetId: window.widgetId,
+      })
+    })
+
+
+    </script>
+
+    <script>
+    let fitWidget = () => {
+      let firstChild = document.getElementById("__widget-container").firstElementChild;
+      let display = firstChild.style.display
+
+      firstChild.style.display = "inline-block"
+
+      let data = {
+        windowId: window.id,
+        width: firstChild.offsetWidth,
+        height: firstChild.offsetHeight,
+        widgetId: window.widgetId,
+      }
+
+      ipcRenderer.send("WIDGET_MEASURE", data)
+      firstChild.style.display = display
+    }
+    setTimeout(fitWidget, 2000)
+
+    ipcRenderer.on('WIDGET_FIT', (event, state)=> {
+      fitWidget()
+    })
+
+    </script>
+  

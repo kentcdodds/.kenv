@@ -28,6 +28,7 @@
     "project-name-generator": "^2.1.9",
     "shell-quote": "^1.8.0",
     "svg-parser": "^2.0.4",
+    "tesseract.js": "^4.0.3",
     "yaml": "^1.10.2",
     "zod": "^3.21.4"
   },
@@ -39,5 +40,8 @@
     "@types/imagemin-svgo": "^10.0.2",
     "@types/shell-quote": "^1.7.1",
     "@types/svg-parser": "^2.0.3"
-  }
+  },
+  "eslintIgnore": [
+    "**/*.*"
+  ]
 }

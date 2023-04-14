@@ -5,6 +5,7 @@ cache
 tmp
 db
 bin
+eng.traineddata
 
 # Logs
 logs
