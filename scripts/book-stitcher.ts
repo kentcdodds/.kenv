@@ -13,6 +13,7 @@ import NodeID3 from 'node-id3'
 import {type Tags} from 'node-id3'
 import {z} from 'zod'
 import shellQuote from 'shell-quote/quote.js'
+import filenamify from 'filenamify'
 
 // to convert files from m4a to mp3
 // for f in *.m4a; do ffmpeg -i "$f" -codec:v copy -codec:a libmp3lame -q:a 2 newfiles/"${f%.m4a}.mp3"; done
@@ -39,35 +40,40 @@ let specifiedTagsRaw: any
 try {
   specifiedTagsRaw = JSON.parse(fs.readFileSync(metadataJsonPath, 'utf-8'))
 } catch (error) {
+  const example = {
+    title: 'Title of the book',
+    artist: 'Author name',
+    subtitle: 'Some description',
+    copyright: 'copyright info',
+    date: '1988-01-01',
+    userDefinedText: [
+      {
+        description: 'book_genre',
+        value: "Children's Audiobooks:Literature & Fiction:Dramatized",
+      },
+      {
+        description: 'narrated_by',
+        value: 'BBC',
+      },
+    ],
+  }
   console.error(
     `
 Make sure you have a metadata.json file at "${metadataJsonPath}" with the audio files:
 
-{
-  "title": "Title of the book",
-  "artist": "Author name",
-  "subtitle": "Some description",
-  "copyright": "copyright info",
-  "date": "1988-01-01",
-  "userDefinedText": [
-    {
-      "description": "book_genre",
-      "value": "Children's Audiobooks:Literature & Fiction:Dramatized"
-    },
-    {
-      "description": "narrated_by",
-      "value": "BBC"
-    },
-    {
-      "description": "asin",
-      "value": -49201153
-    }
-  ]
-}
+${JSON.stringify(example, null, 2)}
     `.trim(),
   )
+  const choice = await arg({
+    choices: ['Yes', 'No'],
+    placeholder: `Create example metadata.json file in ${base}?`,
+  })
+  if (choice === 'Yes') {
+    fs.writeFileSync(metadataJsonPath, JSON.stringify(example, null, 2))
+  }
   throw error
 }
+
 const specifiedTags = z
   .object({
     title: z.string(),
@@ -101,7 +107,12 @@ const metadatas = await Promise.all(
   }),
 )
 
-const defaultOutputFile = path.join(os.homedir(), 'Desktop', `${title}.mp3`)
+const titleAsFilename = filenamify(title)
+const defaultOutputFile = path.join(
+  os.homedir(),
+  'Desktop',
+  `${titleAsFilename}.mp3`,
+)
 const outputFilepath =
   (await arg({
     placeholder: `Where should the output file be?`,
@@ -112,7 +123,7 @@ const outputFilepath =
 const tmpDir = path.join(
   os.tmpdir(),
   'book-stitcher',
-  title.replaceAll(' ', '_'),
+  path.parse(outputFilepath).name,
 )
 const filesListFile = path.join(tmpDir, 'files.txt')
 

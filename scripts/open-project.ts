@@ -61,4 +61,4 @@ const choice = await arg('Which project?', async () => {
   return choices
 })
 
-await edit(choice)
+edit(choice)
