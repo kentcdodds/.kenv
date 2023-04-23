@@ -6,7 +6,8 @@
 
 import '@johnlindquist/kit'
 import fs from 'fs'
-import {fileURLToPath, URL} from 'url'
+import {URL} from 'url'
+import {getTweet} from '../lib/twitter'
 
 const exiftool = await npm('node-exiftool')
 const exiftoolBin = await npm('dist-exiftool')
@@ -14,56 +15,41 @@ const fsExtra = await npm('fs-extra')
 
 const baseOut = home('Pictures/twimages')
 
-const token = await env('TWITTER_BEARER_TOKEN')
 const twitterUrl = await arg('Twitter URL')
 console.log(`Starting with ${twitterUrl}`)
 
 const tweetId = new URL(twitterUrl).pathname.split('/').slice(-1)[0]
-const response = await get(
-  `https://api.twitter.com/1.1/statuses/show/${tweetId}.json?include_entities=true`,
-  {
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-  },
-)
+const tweet = await getTweet(tweetId)
 
-const tweet = response.data
 console.log({tweet})
 
 const {
-  geo,
-  id,
   text,
   created_at,
-  extended_entities: {media: medias} = {
-    media: [
-      {
-        type: 'photo',
-        media_url_https: await arg({
-          ignoreBlur: true,
-          placeholder: `Can't find media. What's the URL for the media?`,
-          hint: `Media URL`,
-        }),
-      },
-    ],
-  },
+  mediaDetails = [
+    {
+      type: 'photo',
+      media_url_https: await arg({
+        ignoreBlur: true,
+        placeholder: `Can't find media. What's the URL for the media?`,
+        hint: `Media URL`,
+      }),
+    },
+  ],
 } = tweet
-
-const [latitude, longitude] = geo?.coordinates || []
 
 const ep = new exiftool.ExiftoolProcess(exiftoolBin)
 
 await ep.open()
 
-for (const media of medias) {
-  let url
+for (const media of mediaDetails) {
+  let url: string
   if (media.type === 'photo') {
     url = media.media_url_https
   } else if (media.type === 'video') {
-    let best = {bitrate: 0}
+    let best: (typeof media.video_info.variants)[number]
     for (const variant of media.video_info.variants) {
-      if (variant.bitrate > best.bitrate) best = variant
+      if (!best || variant.bitrate > best.bitrate) best = variant
     }
     url = best.url
   } else {
@@ -72,7 +58,6 @@ for (const media of medias) {
   if (!url) throw new Error(`Huh... no media url found for ${twitterUrl}`)
 
   const formattedDate = formatDate(created_at)
-  const colonDate = formattedDate.replace(/-/g, ':')
   const formattedTimestamp = formatTimestamp(created_at)
   const filename = new URL(url).pathname.split('/').slice(-1)[0]
   const filepath = path.join(
@@ -92,53 +77,34 @@ for (const media of medias) {
       FileModifyDate: formattedTimestamp,
       ModifyDate: formattedTimestamp,
       CreateDate: formattedTimestamp,
-      ...(geo
-        ? {
-            GPSLatitudeRef: latitude > 0 ? 'North' : 'South',
-            GPSLongitudeRef: longitude > 0 ? 'East' : 'West',
-            GPSLatitude: latitude,
-            GPSLongitude: longitude,
-            GPSDateStamp: colonDate,
-            GPSDateTime: formattedTimestamp,
-          }
-        : null),
     },
     ['overwrite_original'],
   )
 }
 
 await ep.close()
-notify(`All done with ${twitterUrl}`)
+notify(
+  `
+All done with ${twitterUrl}
+Media File Count: ${mediaDetails.length}
+`.trim(),
+)
 
-function formatDate(t) {
+function formatDate(t: string) {
   const d = new Date(t)
   return `${d.getFullYear()}-${padZero(d.getMonth() + 1)}-${padZero(
     d.getDate(),
   )}`
 }
-function formatTimestamp(t) {
+function formatTimestamp(t: string) {
   const d = new Date(t)
-  const formattedDate = formatDate(t)
   return `${formatDate(t)} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`
 }
-function padZero(n) {
+function padZero(n: number) {
   return String(n).padStart(2, '0')
 }
 
-async function getGeoCoords(placeId) {
-  const response = await get(
-    `https://api.twitter.com/1.1/geo/id/${placeId}.json`,
-    {
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    },
-  )
-  const [longitude, latitude] = response.data.centroid
-  return {latitude, longitude}
-}
-
-async function download(url, out) {
+async function download(url: string, out: string) {
   console.log(`downloading ${url} to ${out}`)
   await fsExtra.ensureDir(path.dirname(out))
 
