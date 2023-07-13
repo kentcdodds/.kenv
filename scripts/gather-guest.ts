@@ -56,9 +56,14 @@ async function go() {
     apiKey: GATHER_API_KEY,
     spaceId: GATHER_SPACE_ID,
   })
-  const rawGuests = await fetch(
+  let rawGuests = await fetch(
     `https://gather.town/api/getEmailGuestlist?${params}`,
   ).then(r => r.json())
+
+  // really weird API behavior when there is no guest list
+  if (Array.isArray(rawGuests) && rawGuests.length === 0) {
+    rawGuests = {}
+  }
 
   const guests = GuestsSchema.parse(rawGuests)
 
