@@ -113,3 +113,5 @@ dist
 .tern-port
 .history
 .scripts
+
+/scripts/sandbox.ts
