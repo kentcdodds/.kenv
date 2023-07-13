@@ -40,6 +40,13 @@ const metascraper = makeMetascraper([
 ])
 
 async function getMetadata(url) {
+  if (!url) {
+    return {
+      unsplashPhotoId: 'TODO',
+      author: 'TODO',
+      alt: 'TODO',
+    }
+  }
   const html = await fetch(url).then(res => res.text())
   return metascraper({html, url})
 }
@@ -92,9 +99,12 @@ const unsplashPhotoInput = await arg({
   hint: 'Unsplash Photo',
   ignoreBlur: true,
 })
-const unsplashPhotoUrl = unsplashPhotoInput.startsWith('http')
-  ? unsplashPhotoInput
-  : `https://unsplash.com/photos/${unsplashPhotoInput}`
+const unsplashPhotoUrl =
+  unsplashPhotoInput === ''
+    ? null
+    : unsplashPhotoInput.startsWith('http')
+    ? unsplashPhotoInput
+    : `https://unsplash.com/photos/${unsplashPhotoInput}`
 
 const metadata = await getMetadata(unsplashPhotoUrl)
 

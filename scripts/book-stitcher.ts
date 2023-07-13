@@ -133,6 +133,9 @@ await writeFile(
   files.map(file => `file ${shellQuote([file])}`).join('\n'),
 )
 
+console.log({filesListFile, files})
+
+console.log('stitching')
 await execa(
   '/opt/homebrew/bin/ffmpeg', // path to ffmpeg executable
   // prettier-ignore
@@ -147,7 +150,9 @@ await execa(
   ],
   {stdio: 'inherit'}, // inherit standard I/O streams from parent process
 )
+console.log('finished stitching')
 
+console.log('starting chapters')
 const chapters = []
 let startTimeMs = 0
 for (let fileIndex = 0; fileIndex < metadatas.length; fileIndex++) {
@@ -163,6 +168,7 @@ for (let fileIndex = 0; fileIndex < metadatas.length; fileIndex++) {
 
   startTimeMs = endTimeMs
 }
+console.log('chapters finished')
 
 const tags = {
   title,
@@ -199,10 +205,12 @@ const tags = {
 // it's unclear why zod is parsing specifiedTags as optional properties, but
 // that's why these aren't considered tags 🤷‍♂️
 
+console.log('starting tags')
 const result = NodeID3.write(tags, outputFilepath)
 if (result !== true) {
   throw result
 }
+console.log('tags finished')
 
 export function typedBoolean<T>(
   value: T,
