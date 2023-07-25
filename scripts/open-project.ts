@@ -9,7 +9,7 @@ import path from 'path'
 import fs from 'fs'
 import os from 'os'
 
-const isDirectory = async (filePath: string) => {
+async function isDirectory(filePath: string) {
   try {
     const stat = await fs.promises.stat(filePath)
     return stat.isDirectory()
@@ -17,7 +17,7 @@ const isDirectory = async (filePath: string) => {
     return false
   }
 }
-const isFile = async filePath => {
+async function isFile(filePath: string) {
   try {
     const stat = await fs.promises.stat(filePath)
     return stat.isFile()
@@ -38,6 +38,7 @@ async function getProjects(parentDir: string) {
     if (fullPath.includes('/build/')) continue
     if (fullPath.includes('/dist/')) continue
     if (fullPath.includes('/coverage/')) continue
+    if (fullPath.includes('/.cache/')) continue
 
     const pkgjson = path.join(fullPath, 'package.json')
     if (await isFile(pkgjson)) {
@@ -53,12 +54,9 @@ async function getProjects(parentDir: string) {
   return choices
 }
 
-const choice = await arg('Which project?', async () => {
-  const choices = [
-    ...(await getProjects(path.join(os.homedir(), 'code'))),
-    ...(await getProjects(path.join(os.homedir(), 'Desktop'))),
-  ]
-  return choices
-})
+const choice = await arg('Which project?', [
+  ...(await getProjects(path.join(os.homedir(), 'code'))),
+  ...(await getProjects(path.join(os.homedir(), 'Desktop'))),
+])
 
-edit(choice)
+await edit(choice)

@@ -79,7 +79,7 @@ async function go() {
       preview: () =>
         `<img class="w-full object-cover" src="https://www.gravatar.com/avatar/${md5(
           email,
-        )}?d=retro" />`,
+        )}?d=retro&s=800" />`,
       value: {type: 'modify-guest', email},
     })),
   ]

@@ -41,7 +41,8 @@
     "@types/imagemin-jpegtran": "^5.0.1",
     "@types/imagemin-svgo": "^10.0.2",
     "@types/shell-quote": "^1.7.1",
-    "@types/svg-parser": "^2.0.3"
+    "@types/svg-parser": "^2.0.3",
+    "globby": "^13.2.2"
   },
   "eslintIgnore": [
     "**/*.*"

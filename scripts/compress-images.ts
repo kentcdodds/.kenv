@@ -29,8 +29,17 @@ const plugins = [
 ]
 
 const clipboardImage = await clipboard.readImage()
+const selectedFiles = await getSelectedFile()
 
-if (clipboardImage.byteLength) {
+const choices = [
+  clipboardImage.byteLength ? 'Clipboard' : null,
+  selectedFiles.length ? 'File Selection' : null,
+  'Drop',
+].filter(Boolean)
+const source =
+  choices.length > 1 ? await arg({placeholder: 'Source?'}, choices) : 'Drop'
+
+if (source === 'Clipboard') {
   const before = clipboardImage.byteLength
   const buffer = await imagemin.buffer(clipboardImage, {
     plugins: plugins,
@@ -48,10 +57,9 @@ ${((after / before) * 100).toFixed(2)}% (${formatBytes(
     `.trim(),
   })
 } else {
-  let selectedFiles = await getSelectedFile()
   let filePaths: Array<string>
 
-  if (selectedFiles) {
+  if (source === 'File Selection') {
     filePaths = selectedFiles.split('\n')
   } else {
     let droppedFiles = await drop({placeholder: 'Drop images to compress'})
