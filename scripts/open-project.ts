@@ -1,13 +1,14 @@
 // Menu: Open Project
 // Description: Opens a project in code
 // Shortcut: cmd shift .
+// Cache: true
 
-// Reminder: If the window isn't showing up, hit ⌘+0 from the main window to
-// bring it to the center
 import '@johnlindquist/kit'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
+
+const projects = []
 
 async function isDirectory(filePath: string) {
   try {
@@ -54,9 +55,9 @@ async function getProjects(parentDir: string) {
   return choices
 }
 
-const choice = await arg('Which project?', [
-  ...(await getProjects(path.join(os.homedir(), 'code'))),
-  ...(await getProjects(path.join(os.homedir(), 'Desktop'))),
-])
+projects.push(...(await getProjects(path.join(os.homedir(), 'code'))))
+projects.push(...(await getProjects(path.join(os.homedir(), 'Desktop'))))
+
+const choice = await arg('Which project?', projects)
 
 await edit(choice)
