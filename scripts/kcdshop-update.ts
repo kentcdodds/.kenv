@@ -1,4 +1,7 @@
 // Name: kcdshop-update
+// Description: Update the KCDShop workshop app in all the epicweb-dev workshop repos
+// Author: Kent C. Dodds
+// Twitter: @kentcdodds
 
 import '@johnlindquist/kit'
 import {globby} from 'globby'
