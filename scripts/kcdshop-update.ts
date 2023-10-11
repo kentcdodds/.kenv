@@ -2,7 +2,7 @@
 
 import '@johnlindquist/kit'
 import {globby} from 'globby'
-import {$, execa} from 'execa'
+import {execa} from 'execa'
 
 const workshopDirs = [
   'data-modeling',
