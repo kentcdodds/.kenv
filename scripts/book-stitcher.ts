@@ -40,6 +40,7 @@ let specifiedTagsRaw: any
 try {
   specifiedTagsRaw = JSON.parse(fs.readFileSync(metadataJsonPath, 'utf-8'))
 } catch (error) {
+  console.error(error)
   const example = {
     title: 'Title of the book',
     artist: 'Author name',
@@ -201,7 +202,7 @@ const tags = {
         },
     ...specifiedTags.userDefinedText,
   ].filter(typedBoolean),
-} as Tags
+} satisfies Tags
 // it's unclear why zod is parsing specifiedTags as optional properties, but
 // that's why these aren't considered tags 🤷‍♂️
 
