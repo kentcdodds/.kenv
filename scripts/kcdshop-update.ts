@@ -1,4 +1,4 @@
-// Name: kcdshop-update
+// Name: KCDShop Update
 // Description: Update the KCDShop workshop app in all the epicweb-dev workshop repos
 // Author: Kent C. Dodds
 // Twitter: @kentcdodds
@@ -52,7 +52,11 @@ for (const workshopDir of workshopDirs) {
   }
   if (changed) {
     try {
-      await execa('git', ['add', ...pkgs], {cwd: workshopDir, all: true})
+      await execa('npm', ['install'], {cwd: workshopDir, all: true})
+      await execa('git', ['add', 'package-lock.json', ...pkgs], {
+        cwd: workshopDir,
+        all: true,
+      })
       await execa(
         'git',
         ['commit', '-m', 'chore: update @kentcdodds/workshop-app'],
