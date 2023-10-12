@@ -29,11 +29,11 @@ for (const workshopDir of workshopDirs) {
   console.log(`🔍 ${workshopDirName} - updating version`)
   const hasChanges =
     (
-      await execa('git', ['status', '--porcelain'], {cwd: workshopDir})
+      await execa('git', ['status', '--porcelain'], {env: {}, cwd: workshopDir})
     ).stdout.trim() !== ''
   if (hasChanges) {
     try {
-      await execa('git', ['stash'], {cwd: workshopDir, all: true})
+      await execa('git', ['stash'], {env: {}, cwd: workshopDir, all: true})
     } catch (error) {
       console.log(error.all)
       throw `❌  ${workshopDirName} failed to stash properly`
@@ -52,20 +52,25 @@ for (const workshopDir of workshopDirs) {
   }
   if (changed) {
     try {
-      await execa('npm', ['install'], {cwd: workshopDir, all: true})
+      await execa('npm', ['install'], {env: {}, cwd: workshopDir, all: true})
       await execa('git', ['add', 'package-lock.json', ...pkgs], {
+        env: {},
         cwd: workshopDir,
         all: true,
       })
       await execa(
         'git',
         ['commit', '-m', 'chore: update @kentcdodds/workshop-app'],
-        {cwd: workshopDir, all: true},
+        {env: {}, cwd: workshopDir, all: true},
       )
-      await execa('git', ['pull'], {cwd: workshopDir, all: true})
-      await execa('git', ['push'], {cwd: workshopDir, all: true})
+      await execa('git', ['pull'], {env: {}, cwd: workshopDir, all: true})
+      await execa('git', ['push'], {env: {}, cwd: workshopDir, all: true})
       if (hasChanges) {
-        await execa('git', ['stash', 'pop'], {cwd: workshopDir, all: true})
+        await execa('git', ['stash', 'pop'], {
+          env: {},
+          cwd: workshopDir,
+          all: true,
+        })
       }
       console.log(`✅ ${workshopDirName} finished`)
     } catch (playwrightErrorResult) {
