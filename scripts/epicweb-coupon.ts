@@ -14,7 +14,7 @@ const [quantity, percentOff] = await fields({
   },
   fields: [
     {label: 'Quantity', value: '1', type: 'number', required: true},
-    {label: 'percentOff', value: '20', type: 'number', required: true},
+    {label: 'Percent off', value: '40', type: 'number', required: true},
   ],
 })
 
