@@ -8,11 +8,12 @@ import {globby} from 'globby'
 import {execa} from 'execa'
 
 const workshopDirs = [
-  'data-modeling',
   'full-stack-foundations',
-  'full-stack-testing',
-  'web-auth',
   'web-forms',
+  'data-modeling',
+  'web-auth',
+  'full-stack-testing',
+  'react-fundamentals',
 ].map(dir => home('code', 'epicweb-dev', dir))
 
 const version = (

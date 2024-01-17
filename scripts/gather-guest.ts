@@ -315,4 +315,4 @@ All properties are optional. Can be an empty object.
   )
 }
 
-go()
+await go()

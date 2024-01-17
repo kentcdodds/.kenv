@@ -18,8 +18,7 @@ if (query.includes('@')) {
 
 if (!urlString) {
   const url = new URL(`https://app.convertkit.com/subscribers`)
-  url.searchParams.set('utf8', '✓')
-  url.searchParams.set('search', query)
+  url.searchParams.set('q', query)
   url.searchParams.set('status', 'all')
   urlString = url.toString()
 }

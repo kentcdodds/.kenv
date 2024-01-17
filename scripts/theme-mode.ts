@@ -1,5 +1,5 @@
 // Shortcut: control ;
-// Name: theme mode
+// Name: Toggle Theme
 
 // https://github.com/qualialog/dotfiles/blob/main/files/scripts/theme-mode.js
 
