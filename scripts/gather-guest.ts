@@ -46,7 +46,9 @@ const GATHER_SPACE_ID = await env('GATHER_SPACE_ID', async () => {
 
 It's everything after "app/" in this URL with "/" replaced by "\\":
 
-https://app.gather.town/app/BL0B93FK23T/example
+So, if my URL is: \`https://app.gather.town/app/BL0B93FK23T/example\`
+
+Then my space ID is: \`BL0B93FK23T\\example\`
     `),
   )
 })

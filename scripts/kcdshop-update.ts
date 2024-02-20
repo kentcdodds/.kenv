@@ -14,6 +14,12 @@ const workshopDirs = [
   'web-auth',
   'full-stack-testing',
   'react-fundamentals',
+  'react-hooks',
+  'advanced-react-hooks',
+  'advanced-react-patterns',
+  'react-performance',
+  // 'react-suspense',
+  // 'react-server-components',
 ].map(dir => home('code', 'epicweb-dev', dir))
 
 const version = (
