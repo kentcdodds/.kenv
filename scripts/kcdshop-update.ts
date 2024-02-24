@@ -18,7 +18,7 @@ const workshopDirs = [
   'advanced-react-hooks',
   'advanced-react-patterns',
   'react-performance',
-  // 'react-suspense',
+  'react-suspense',
   // 'react-server-components',
 ].map(dir => home('code', 'epicweb-dev', dir))
 
@@ -49,10 +49,13 @@ for (const workshopDir of workshopDirs) {
   for (const pkg of pkgs) {
     const pkgPath = path.join(workshopDir, pkg)
     const contents = await readFile(pkgPath, 'utf8')
-    const newContents = contents.replace(
-      /(@kentcdodds\/workshop-app":\s*")([^"]+)"/,
-      `$1^${version}"`,
-    )
+    const newContents = contents
+      .replace(/(@kentcdodds\/workshop-app":\s*")([^"]+)"/, `$1^${version}"`)
+      .replace(/(@kentcdodds\/workshop-utils":\s*")([^"]+)"/, `$1^${version}"`)
+      .replace(
+        /(@kentcdodds\/workshop-presence":\s*")([^"]+)"/,
+        `$1^${version}"`,
+      )
     if (contents === newContents) continue
     await writeFile(pkgPath, newContents)
     changed = true
@@ -60,7 +63,11 @@ for (const workshopDir of workshopDirs) {
   if (changed) {
     try {
       await execa('npm', ['install'], {env: {}, cwd: workshopDir, all: true})
-      await execa('git', ['add', 'package-lock.json', ...pkgs], {
+      const pkgLocks = await globby('**/package-lock.json', {
+        cwd: workshopDir,
+        gitignore: true,
+      })
+      await execa('git', ['add', ...pkgLocks, ...pkgs], {
         env: {},
         cwd: workshopDir,
         all: true,
@@ -80,8 +87,8 @@ for (const workshopDir of workshopDirs) {
         })
       }
       console.log(`✅ ${workshopDirName} finished`)
-    } catch (playwrightErrorResult) {
-      console.log(playwrightErrorResult.all)
+    } catch (updateErrorResult) {
+      console.log(updateErrorResult.all)
       throw `❌  ${workshopDirName} failed`
     }
   } else {
