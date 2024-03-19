@@ -28,11 +28,16 @@ import filenamify from 'filenamify'
 └── metadata.json
 */
 
-const base = await arg({
-  placeholder: `Where are the mp3 files?`,
-  hint: 'It should be in a directory with the mp3 files and art.jpg',
-  ignoreBlur: true,
-})
+const selectedDir = await getSelectedDir()
+
+const base =
+  (await arg({
+    placeholder: `Where are the mp3 files?`,
+    description: `The directory should contain the metadata.json, mp3 files, an art.jpg file`,
+    defaultValue: selectedDir,
+    hint: `Should have mp3s and art.jpg. Default is ${selectedDir}`,
+    ignoreBlur: true,
+  })) || selectedDir
 
 const metadataJsonPath = path.join(base, 'metadata.json')
 
@@ -134,7 +139,12 @@ await writeFile(
   files.map(file => `file ${shellQuote([file])}`).join('\n'),
 )
 
-console.log({filesListFile, files})
+const bitrate = await arg({
+  placeholder: `What bitrate should the audio be?`,
+  hint: `The higher the number, the bigger the file. 64k is fine for regular audiobooks, higher for dramatized versions.`,
+  choices: ['64k', '128k', '192k'],
+  defaultValue: '64k',
+})
 
 console.log('stitching')
 await execa(
@@ -146,7 +156,7 @@ await execa(
     '-safe', '0', // allow unsafe file access
     '-i', filesListFile, // path to a file containing a list of input files to concatenate
     '-c:a', 'mp3', // set audio codec to mp3
-    '-b:a', '64k', // set audio bitrate to 64 kbps
+    '-b:a', bitrate, // set audio bitrate to 64 kbps
     outputFilepath, // path to the output file
   ],
   {stdio: 'inherit'}, // inherit standard I/O streams from parent process
@@ -171,10 +181,15 @@ for (let fileIndex = 0; fileIndex < metadatas.length; fileIndex++) {
 }
 console.log('chapters finished')
 
+// the types are wrong and the fix hasn't been released.
+type CorrectedTags = Omit<Tags, 'userDefinedText'> & {
+  userDefinedText: Array<Partial<Tags['userDefinedText'][0]>>
+}
+
 const tags = {
   title,
   album: title,
-  albumArtist: specifiedTags.artist,
+  artist: specifiedTags.artist,
   genre: 'Audiobook',
   date: specifiedTags.date.split('-')[0],
 
@@ -202,12 +217,10 @@ const tags = {
         },
     ...specifiedTags.userDefinedText,
   ].filter(typedBoolean),
-} satisfies Tags
-// it's unclear why zod is parsing specifiedTags as optional properties, but
-// that's why these aren't considered tags 🤷‍♂️
+} satisfies CorrectedTags
 
 console.log('starting tags')
-const result = NodeID3.write(tags, outputFilepath)
+const result = NodeID3.write(tags as Tags, outputFilepath)
 if (result !== true) {
   throw result
 }
