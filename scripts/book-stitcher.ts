@@ -139,12 +139,13 @@ await writeFile(
   files.map(file => `file ${shellQuote([file])}`).join('\n'),
 )
 
-const bitrate = await arg({
-  placeholder: `What bitrate should the audio be?`,
-  hint: `The higher the number, the bigger the file. 64k is fine for regular audiobooks, higher for dramatized versions.`,
-  choices: ['64k', '128k', '192k'],
-  defaultValue: '64k',
-})
+const bitrate =
+  (await arg({
+    placeholder: `What bitrate should the audio be?`,
+    hint: `The higher the number, the bigger the file. 64k is fine for regular audiobooks, higher for dramatized versions.`,
+    choices: ['64k', '128k', '192k'],
+    defaultValue: '64k',
+  })) || '64k'
 
 console.log('stitching')
 await execa(
