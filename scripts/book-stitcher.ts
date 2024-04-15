@@ -157,7 +157,7 @@ await execa(
     '-safe', '0', // allow unsafe file access
     '-i', filesListFile, // path to a file containing a list of input files to concatenate
     '-c:a', 'mp3', // set audio codec to mp3
-    '-b:a', bitrate, // set audio bitrate to 64 kbps
+    '-b:a', bitrate, // set audio bitrate
     outputFilepath, // path to the output file
   ],
   {stdio: 'inherit'}, // inherit standard I/O streams from parent process

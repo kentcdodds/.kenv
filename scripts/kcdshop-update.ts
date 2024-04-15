@@ -19,7 +19,7 @@ const workshopDirs = [
   'advanced-react-patterns',
   'react-performance',
   'react-suspense',
-  // 'react-server-components',
+  'react-server-components',
 ].map(dir => home('code', 'epicweb-dev', dir))
 
 const version = (

@@ -1,4 +1,4 @@
-import type { Tweet } from './types/index.js'
+import type {Tweet} from './types/index.js'
 
 const SYNDICATION_URL = 'https://cdn.syndication.twimg.com'
 
@@ -24,7 +24,13 @@ export class TwitterApiError extends Error {
 
 const TWEET_ID = /^[0-9]+$/
 
-export async function getTweet(id: string): Promise<Tweet | undefined> {
+function getToken(id: string) {
+  return ((Number(id) / 1e15) * Math.PI)
+    .toString(6 ** 2)
+    .replace(/(0+|\.)/g, '')
+}
+
+export async function getTweet(id: string): Promise<Tweet | null> {
   if (id.length > 40 || !TWEET_ID.test(id)) {
     throw new Error(`Invalid tweet id: ${id}`)
   }
@@ -33,6 +39,7 @@ export async function getTweet(id: string): Promise<Tweet | undefined> {
 
   url.searchParams.set('id', id)
   url.searchParams.set('lang', 'en')
+  url.searchParams.set('token', getToken(id))
   url.searchParams.set(
     'features',
     [
@@ -47,15 +54,19 @@ export async function getTweet(id: string): Promise<Tweet | undefined> {
       'tfw_show_gov_verified_badge:on',
       'tfw_show_business_affiliate_badge:on',
       'tfw_tweet_edit_frontend:on',
-    ].join(';')
+    ].join(';'),
   )
 
   const res = await fetch(url.toString())
   const isJson = res.headers.get('content-type')?.includes('application/json')
   const data = isJson ? await res.json() : undefined
 
-  if (res.ok) return data
-  if (res.status === 404) return
+  if (res.ok) {
+    if (data && Object.keys(data).length) return data
+    console.error('Empty response from Twitter API', data)
+    return null
+  }
+  if (res.status === 404) return null
 
   throw new TwitterApiError({
     message: typeof data.error === 'string' ? data.error : 'Bad request.',
