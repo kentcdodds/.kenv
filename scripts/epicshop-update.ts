@@ -1,5 +1,5 @@
-// Name: KCDShop Update
-// Description: Update the KCDShop workshop app in all the epicweb-dev workshop repos
+// Name: EpicShop Update
+// Description: Update the EpicShop workshop app in all the epic web workshop repos
 // Author: Kent C. Dodds
 // Twitter: @kentcdodds
 
@@ -8,14 +8,17 @@ import {globby} from 'globby'
 import {execa} from 'execa'
 
 const workshopDirs = [
+  // Volume 1
   'full-stack-foundations',
   'web-forms',
   'data-modeling',
   'web-auth',
   'full-stack-testing',
+
+  // Epic React
   'react-fundamentals',
   'react-hooks',
-  'advanced-react-hooks',
+  'advanced-react-apis',
   'advanced-react-patterns',
   'react-performance',
   'react-suspense',
@@ -23,7 +26,7 @@ const workshopDirs = [
 ].map(dir => home('code', 'epicweb-dev', dir))
 
 const version = (
-  await execaCommand('npm show @kentcdodds/workshop-app version')
+  await execaCommand('npm show @epic-web/workshop-app version')
 ).stdout.trim()
 
 for (const workshopDir of workshopDirs) {
@@ -50,12 +53,9 @@ for (const workshopDir of workshopDirs) {
     const pkgPath = path.join(workshopDir, pkg)
     const contents = await readFile(pkgPath, 'utf8')
     const newContents = contents
-      .replace(/(@kentcdodds\/workshop-app":\s*")([^"]+)"/, `$1^${version}"`)
-      .replace(/(@kentcdodds\/workshop-utils":\s*")([^"]+)"/, `$1^${version}"`)
-      .replace(
-        /(@kentcdodds\/workshop-presence":\s*")([^"]+)"/,
-        `$1^${version}"`,
-      )
+      .replace(/(@epic-web\/workshop-app":\s*")([^"]+)"/, `$1^${version}"`)
+      .replace(/(@epic-web\/workshop-utils":\s*")([^"]+)"/, `$1^${version}"`)
+      .replace(/(@epic-web\/workshop-presence":\s*")([^"]+)"/, `$1^${version}"`)
     if (contents === newContents) continue
     await writeFile(pkgPath, newContents)
     changed = true
@@ -74,7 +74,7 @@ for (const workshopDir of workshopDirs) {
       })
       await execa(
         'git',
-        ['commit', '-m', 'chore: update @kentcdodds/workshop-app'],
+        ['commit', '-m', 'chore: update @epic-web/workshop-app'],
         {env: {}, cwd: workshopDir, all: true},
       )
       await execa('git', ['pull'], {env: {}, cwd: workshopDir, all: true})

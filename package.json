@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@johnlindquist/kit": "file:../.kit",
+    "@kentcdodds/md-temp": "^8.0.1",
     "@types/imagemin": "^8.0.1",
     "@types/imagemin-gifsicle": "^7.0.1",
     "@types/imagemin-jpegtran": "^5.0.1",
@@ -43,7 +44,12 @@
     "@types/shell-quote": "^1.7.1",
     "@types/svg-parser": "^2.0.3",
     "execa": "^8.0.1",
-    "globby": "^13.2.2"
+    "globby": "^13.2.2",
+    "rehype-stringify": "^10.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.0",
+    "shiki": "^1.4.0",
+    "unified": "^11.0.4"
   },
   "eslintIgnore": [
     "**/*.*"
