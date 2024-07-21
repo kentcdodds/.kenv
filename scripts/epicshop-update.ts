@@ -23,6 +23,7 @@ const workshopDirs = [
   'react-performance',
   'react-suspense',
   'react-server-components',
+  'build-react-hooks',
 ].map(dir => home('code', 'epicweb-dev', dir))
 
 const version = (

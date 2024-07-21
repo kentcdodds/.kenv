@@ -83,16 +83,18 @@ ${JSON.stringify(example, null, 2)}
 const specifiedTags = z
   .object({
     title: z.string(),
-    artist: z.string(),
-    copyright: z.string(),
-    subtitle: z.string(),
+    artist: z.string().optional(),
+    copyright: z.string().optional(),
+    subtitle: z.string().optional(),
     date: z.string(),
-    userDefinedText: z.array(
-      z.object({
-        description: z.string(),
-        value: z.string(),
-      }),
-    ),
+    userDefinedText: z
+      .array(
+        z.object({
+          description: z.string(),
+          value: z.string(),
+        }),
+      )
+      .optional(),
   })
   .parse(specifiedTagsRaw)
 
@@ -108,7 +110,7 @@ const metadatas = await Promise.all(
     return {
       filepath,
       duration: meta.format.duration,
-      title: meta.common.title,
+      title: meta.common.title || path.parse(filepath).name,
     }
   }),
 )
@@ -194,7 +196,11 @@ const tags = {
   genre: 'Audiobook',
   date: specifiedTags.date.split('-')[0],
 
-  image: path.join(base, 'art.jpg'),
+  image: getFirst(
+    path.join(base, 'art.jpg'),
+    path.join(base, 'art.jpeg'),
+    path.join(base, 'art.png'),
+  ),
   chapter: chapters,
   ...specifiedTags,
   userDefinedText: [
@@ -231,4 +237,11 @@ export function typedBoolean<T>(
   value: T,
 ): value is Exclude<T, false | null | undefined | '' | 0> {
   return Boolean(value)
+}
+
+function getFirst(...paths: Array<string>) {
+  for (const path of paths) {
+    if (pathExistsSync(path)) return path
+  }
+  return paths[0]
 }

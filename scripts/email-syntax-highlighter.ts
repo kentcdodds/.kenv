@@ -46,7 +46,7 @@ async function processMarkdown(markdown: string) {
     .use(rehypeStringify)
     .process(markdown)
 
-  return result.value.toString()
+  return result.value.toString().trim()
 }
 
 function replaceCssVars(html: string) {
