@@ -8,14 +8,8 @@ import {globby} from 'globby'
 import {execa} from 'execa'
 
 const workshopDirs = [
-  // Volume 1
-  'full-stack-foundations',
-  'web-forms',
-  'data-modeling',
-  'web-auth',
-  'full-stack-testing',
-
   // Epic React
+  'get-started-with-react',
   'react-fundamentals',
   'react-hooks',
   'advanced-react-apis',
@@ -24,6 +18,16 @@ const workshopDirs = [
   'react-suspense',
   'react-server-components',
   'build-react-hooks',
+
+  // Volume 1
+  'full-stack-foundations',
+  'web-forms',
+  'data-modeling',
+  'web-auth',
+  'full-stack-testing',
+
+  // other
+  'workshop-template',
 ].map(dir => home('code', 'epicweb-dev', dir))
 
 const version = (
