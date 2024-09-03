@@ -60,4 +60,4 @@ projects.push(...(await getProjects(path.join(os.homedir(), 'Desktop'))))
 
 const choice = await arg('Which project?', projects)
 
-await edit(choice)
+await exec(`/usr/local/bin/cursor ${choice}`)
