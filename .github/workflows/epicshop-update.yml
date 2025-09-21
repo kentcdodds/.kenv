@@ -1,0 +1,75 @@
+name: EpicShop Update
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_update:
+        description: 'Confirm you want to update all workshop repositories'
+        required: true
+        default: 'no'
+        type: choice
+        options:
+          - 'yes'
+          - 'no'
+      workshops_directory:
+        description: 'Path to workshops directory (optional, defaults to ~/code)'
+        required: false
+        default: ''
+
+jobs:
+  epicshop-update:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm_update == 'yes'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.18.2'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g @johnlindquist/kit ts-node
+          
+      - name: Setup Kit CLI and Environment
+        run: |
+          # Initialize kit environment
+          mkdir -p ~/.kenv
+          cp -r . ~/.kenv/
+          
+          # Set kit to use this environment
+          export KENV=~/.kenv
+          
+      - name: Configure Git
+        run: |
+          git config --global user.name "EpicShop Update Bot"
+          git config --global user.email "epicshop-update@kentcdodds.com"
+          git config --global init.defaultBranch main
+          
+      - name: Setup Git Authentication
+        run: |
+          git config --global credential.helper store
+          echo "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com" > ~/.git-credentials
+          
+      - name: Create workshops directory structure
+        run: |
+          mkdir -p ~/code
+          mkdir -p ~/Desktop
+          # If a custom directory is provided, create it
+          if [ -n "${{ github.event.inputs.workshops_directory }}" ]; then
+            mkdir -p "${{ github.event.inputs.workshops_directory }}"
+          fi
+          
+      - name: Run EpicShop Update
+        run: |
+          export KENV=~/.kenv
+          cd ~/.kenv
+          kit run scripts/epicshop-update-ci.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KENV: ~/.kenv
