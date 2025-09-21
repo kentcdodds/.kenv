@@ -1,5 +1,9 @@
 name: EpicShop Update
 
+# Manually triggered workflow to update @epic-web/workshop-app across all workshop repositories
+# This workflow runs the epicshop-update script in a CI environment
+# Note: May require additional permissions/tokens to push to external repositories
+
 on:
   workflow_dispatch:
     inputs:

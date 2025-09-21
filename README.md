@@ -23,4 +23,11 @@ The action will:
 - Update package versions and commit changes
 - Push updates to the respective repositories
 
-**Note:** This action requires appropriate Git permissions to push to the workshop repositories.
+**Important Notes:**
+- The default `GITHUB_TOKEN` only has permissions for this repository
+- To update external repositories, you may need to:
+  - Add a personal access token as a repository secret
+  - Update the workflow to use that token instead
+  - Ensure the token has appropriate permissions for the target repositories
+- The script looks for workshop directories in `~/code` and `~/Desktop` by default
+- In CI environment, these directories need to contain cloned workshop repositories
