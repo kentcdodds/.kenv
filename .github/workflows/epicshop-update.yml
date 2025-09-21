@@ -1,0 +1,275 @@
+name: EpicShop Update
+
+# This workflow allows manual triggering of the epicshop-update script from GitHub Actions
+# It's designed to work from mobile devices or any remote location with GitHub access
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_large_batch:
+        description: 'Auto-confirm if more than 30 directories found (y/n)'
+        required: false
+        default: 'n'
+        type: choice
+        options:
+          - 'y'
+          - 'n'
+
+jobs:
+  epicshop-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Use a personal access token with repo and workflow permissions
+          # The default GITHUB_TOKEN has limited permissions for pushing to other repos
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.18.2'
+          cache: 'npm'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          # Configure git to use the token for HTTPS authentication
+          git config --global url."https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create standalone epicshop-update script for CI
+        run: |
+          # Create a standalone version that doesn't depend on @johnlindquist/kit
+          cat > scripts/epicshop-update-ci.js << 'EOF'
+          #!/usr/bin/env node
+
+          // Standalone CI version of EpicShop Update
+          // Description: Update the EpicShop workshop app in all the epic web workshop repos (CI mode)
+          // Author: Kent C. Dodds
+          // Twitter: @kentcdodds
+
+          import {globby} from 'globby'
+          import {execa, execaCommand} from 'execa'
+          import chalk from 'chalk'
+          import fs from 'fs/promises'
+          import path from 'path'
+          import os from 'os'
+
+          const home = () => os.homedir()
+
+          async function getLatestMtime(dir) {
+            try {
+              const files = await fs.readdir(dir, {withFileTypes: true})
+              let latestMtime = 0
+              for (const file of files) {
+                if (file.name === 'node_modules') continue
+                const fullPath = path.join(dir, file.name)
+                const stats = await fs.stat(fullPath)
+                latestMtime = Math.max(latestMtime, stats.mtime.getTime())
+                if (file.isDirectory()) {
+                  latestMtime = Math.max(latestMtime, await getLatestMtime(fullPath))
+                }
+              }
+              return latestMtime
+            } catch (error) {
+              console.warn(`Warning: Could not read directory ${dir}:`, error.message)
+              return 0
+            }
+          }
+
+          async function findWorkshopDirs(startDir) {
+            try {
+              const dirs = await fs.readdir(startDir, {withFileTypes: true})
+              const workshopDirs = []
+
+              for (const dir of dirs) {
+                if (!dir.isDirectory() || dir.name === 'node_modules') continue
+                const fullPath = path.join(startDir, dir.name)
+                const epicshopPath = path.join(fullPath, 'epicshop')
+                const packageJsonPath = path.join(fullPath, 'package.json')
+
+                const pkgStat = await fs.stat(packageJsonPath).catch(() => null)
+                const hasPkgJson = pkgStat ? pkgStat.isFile() : false
+                if (hasPkgJson) {
+                  const epicshopDirStat = await fs.stat(epicshopPath).catch(() => null)
+                  const hasEpicshopDir = epicshopDirStat
+                    ? epicshopDirStat.isDirectory()
+                    : false
+                  if (hasEpicshopDir) {
+                    workshopDirs.push(fullPath)
+                  }
+                  // once we find a package.json, we don't need to look deeper
+                  continue
+                }
+
+                workshopDirs.push(...(await findWorkshopDirs(fullPath)))
+              }
+
+              return workshopDirs
+            } catch (error) {
+              console.warn(`Warning: Could not search directory ${startDir}:`, error.message)
+              return []
+            }
+          }
+
+          async function getSortedWorkshopDirs() {
+            const workshopDirs = [
+              ...(await findWorkshopDirs(path.join(home(), 'code'))),
+              ...(await findWorkshopDirs(path.join(home(), 'Desktop'))),
+            ]
+
+            const workshopDirsWithMtime = await Promise.all(
+              workshopDirs.map(async dir => ({
+                dir,
+                mtime: await getLatestMtime(dir),
+              })),
+            )
+
+            workshopDirsWithMtime.sort((a, b) => b.mtime - a.mtime)
+
+            const sortedWorkshopDirs = workshopDirsWithMtime.map(({dir}) => dir)
+
+            return sortedWorkshopDirs
+          }
+
+          async function updateWorkshopRepos(workshopDirs) {
+            const version = (
+              await execaCommand('npm show @epic-web/workshop-app version')
+            ).stdout.trim()
+
+            console.log(`🔍 Updating to version ${version}`)
+
+            for (const workshopDir of workshopDirs) {
+              const workshopDirName = path.basename(workshopDir)
+              const pkgs = await globby(`**/package.json`, {
+                cwd: workshopDir,
+                gitignore: true,
+              })
+              let changed = false
+              console.log(`🔍 ${workshopDirName} - updating version`)
+              const hasChanges =
+                (
+                  await execa('git', ['status', '--porcelain'], {
+                    env: {},
+                    cwd: workshopDir,
+                  })
+                ).stdout.trim() !== ''
+              if (hasChanges) {
+                try {
+                  await execa('git', ['stash'], {env: {}, cwd: workshopDir, all: true})
+                } catch (error) {
+                  console.log(error.all)
+                  throw `❌  ${workshopDirName} failed to stash properly`
+                }
+              }
+              for (const pkg of pkgs) {
+                const pkgPath = path.join(workshopDir, pkg)
+                const contents = await fs.readFile(pkgPath, 'utf8')
+                const newContents = contents
+                  .replace(/(@epic-web\/workshop-app":\s*")([^"]+)"/, `$1^${version}"`)
+                  .replace(/(@epic-web\/workshop-utils":\s*")([^"]+)"/, `$1^${version}"`)
+                  .replace(
+                    /(@epic-web\/workshop-presence":\s*")([^"]+)"/,
+                    `$1^${version}"`,
+                  )
+                if (contents === newContents) continue
+                await fs.writeFile(pkgPath, newContents)
+                changed = true
+              }
+              if (changed) {
+                try {
+                  await execa('npm', ['install'], {env: {}, cwd: workshopDir, all: true})
+                  const pkgLocks = await globby('**/package-lock.json', {
+                    cwd: workshopDir,
+                    gitignore: true,
+                  })
+                  await execa('git', ['add', ...pkgLocks, ...pkgs], {
+                    env: {},
+                    cwd: workshopDir,
+                    all: true,
+                  })
+                  await execa(
+                    'git',
+                    ['commit', '-m', 'chore: update @epic-web/workshop-app'],
+                    {env: {}, cwd: workshopDir, all: true},
+                  )
+                  await execa('git', ['pull'], {env: {}, cwd: workshopDir, all: true})
+                  await execa('git', ['push'], {env: {}, cwd: workshopDir, all: true})
+                  if (hasChanges) {
+                    await execa('git', ['stash', 'pop'], {
+                      env: {},
+                      cwd: workshopDir,
+                      all: true,
+                    })
+                  }
+                  console.log(`✅ ${workshopDirName} finished`)
+                } catch (updateErrorResult) {
+                  console.log(updateErrorResult.all)
+                  throw `❌  ${workshopDirName} failed`
+                }
+              } else {
+                console.log(`🟢 ${workshopDirName} already up to date`)
+              }
+            }
+          }
+
+          async function main() {
+            const sortedWorkshopDirs = await getSortedWorkshopDirs()
+
+            console.log(`Found ${sortedWorkshopDirs.length} workshop directories:`)
+            console.log(
+              sortedWorkshopDirs
+                .map(dir => `  ${chalk.cyan('-')} ${chalk.green(path.basename(dir))}`)
+                .join('\n'),
+            )
+
+            if (sortedWorkshopDirs.length > 30) {
+              console.log(
+                '🚨  Found more than 30 workshop directories. Auto-confirmation setting:',
+                process.env.GITHUB_ACTION_CONFIRM || 'n'
+              )
+              const confirm = process.env.GITHUB_ACTION_CONFIRM || 'n'
+              if (confirm !== 'y') {
+                console.log('👋  Exiting - confirmation required for large batch operations')
+                console.log('Use the "confirm_large_batch" input with "y" to proceed with large batches')
+                process.exit(1)
+              } else {
+                console.log('✅  Proceeding with large batch operation as confirmed')
+              }
+            }
+
+            await updateWorkshopRepos(sortedWorkshopDirs)
+            console.log('🎉  EpicShop Update completed successfully!')
+          }
+
+          main().catch(error => {
+            console.error('❌  EpicShop Update failed:', error)
+            process.exit(1)
+          })
+          EOF
+
+      - name: Setup workshop directories structure
+        run: |
+          mkdir -p ~/code ~/Desktop
+          echo "Created basic directory structure for workshop discovery"
+
+      - name: Run EpicShop Update
+        env:
+          GITHUB_ACTION_CONFIRM: ${{ github.event.inputs.confirm_large_batch }}
+          CI: true
+        run: |
+          echo "Starting EpicShop Update process..."
+          echo "Large batch confirmation: ${{ github.event.inputs.confirm_large_batch }}"
+          echo "Working directory: $(pwd)"
+
+          # Run the standalone CI version of the script
+          node scripts/epicshop-update-ci.js
+
+      - name: Clean up CI script
+        run: rm -f scripts/epicshop-update-ci.js
