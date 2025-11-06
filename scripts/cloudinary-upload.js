@@ -95,7 +95,27 @@ while (true) {
 cacheDb.data.lastChoice = chosenDirectory
 await cacheDb.write()
 
-const images = await drop('Drop the image(s) you want to upload')
+// Get images from clipboard, selected files, or drop
+const clipboardImage = await clipboard.readImage()
+const selectedFiles = await getSelectedFile()
+
+const choices = [
+  clipboardImage.byteLength ? 'Clipboard' : null,
+  selectedFiles.length ? 'File Selection' : null,
+  'Drop',
+].filter(Boolean)
+
+const source =
+  choices.length > 1 ? await arg({placeholder: 'Source?'}, choices) : choices[0]
+
+let images = []
+if (source === 'Clipboard') {
+  images = [{path: 'clipboard-image', buffer: clipboardImage}]
+} else if (source === 'File Selection') {
+  images = selectedFiles.split('\n').map(path => ({path}))
+} else {
+  images = await drop('Drop the image(s) you want to upload')
+}
 
 let renameSome = true
 if (images.length > 1) {
@@ -107,7 +127,10 @@ if (images.length > 1) {
 }
 
 for (const image of images) {
-  const defaultName = path.parse(image.path).name
+  const defaultName =
+    image.path === 'clipboard-image'
+      ? 'clipboard-image'
+      : path.parse(image.path).name
 
   const name = renameSome
     ? (await arg({
@@ -117,11 +140,16 @@ for (const image of images) {
     : defaultName
 
   setPlaceholder(`Uploading ${name}`)
-  const uploadedImage = await cloudinary.v2.uploader.upload(image.path, {
+
+  const uploadOptions = {
     public_id: name,
     overwrite: false,
     folder: chosenDirectory,
-  })
+  }
+
+  const uploadedImage = image.buffer
+    ? await cloudinary.v2.uploader.upload(image.buffer, uploadOptions)
+    : await cloudinary.v2.uploader.upload(image.path, uploadOptions)
 
   // If you have multiple files then this isn't really useful unless you have
   // clipbloard history (which I recommend you get!)

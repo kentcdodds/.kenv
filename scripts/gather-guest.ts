@@ -23,7 +23,6 @@ const GATHER_API_KEY = await env('GATHER_API_KEY', async () => {
   return await arg(
     {
       placeholder: 'GATHER_API_KEY',
-      ignoreBlur: true,
     },
     () =>
       md(`
@@ -38,7 +37,6 @@ const GATHER_SPACE_ID = await env('GATHER_SPACE_ID', async () => {
   return await arg(
     {
       placeholder: 'GATHER_SPACE_ID',
-      ignoreBlur: true,
     },
     () =>
       md(`
@@ -73,6 +71,8 @@ async function go() {
     {name: '➕ Add a guest', value: {type: 'add-guest'}},
     {name: '💾 Save guestlist', value: {type: 'save-guestlist'}},
     {name: '📤 Upload guestlist', value: {type: 'upload-guestlist'}},
+    {name: '❌ Remove All guests', value: {type: 'remove-all-guests'}},
+    {name: '🗑️ Delete guestlist', value: {type: 'delete-guestlist'}},
     ...Object.entries(guests).map(([email, {name, affiliation, role}]) => ({
       name: email,
       description: `${name?.trim() || 'Unnamed'}, ${
@@ -94,6 +94,8 @@ async function go() {
     z.object({type: z.literal('add-guest')}),
     z.object({type: z.literal('save-guestlist')}),
     z.object({type: z.literal('upload-guestlist')}),
+    z.object({type: z.literal('remove-all-guests')}),
+    z.object({type: z.literal('delete-guestlist')}),
     z.object({
       type: z.literal('modify-guest'),
       email: z.string(),
@@ -115,6 +117,14 @@ async function go() {
     }
     case 'upload-guestlist': {
       await uploadGuestList(guests)
+      return go()
+    }
+    case 'remove-all-guests': {
+      await removeAllGuests()
+      return go()
+    }
+    case 'delete-guestlist': {
+      await deleteGuestList()
       return go()
     }
     default: {
@@ -256,7 +266,7 @@ All properties are optional. Can be an empty object.
   }
 
   if (!newGuests) {
-    notify({title: 'Invalid guestlist', message: 'Please try again'})
+    notify({title: 'Invalid guestlist', body: 'Please try again'})
     return go()
   }
 
@@ -315,6 +325,45 @@ All properties are optional. Can be an empty object.
     Object.keys(update).length,
     'guests now on the list.',
   )
+}
+
+async function removeAllGuests() {
+  const confirm = await arg({
+    placeholder:
+      'Are you sure you want to remove all guests? This does not open up the guests to everyone (there is no API for that). This cannot be undone.',
+    hint: 'Type YES to confirm',
+  })
+  if (confirm !== 'YES') {
+    notify({title: 'Remove all guests cancelled'})
+    return
+  }
+  const body = {
+    apiKey: GATHER_API_KEY,
+    spaceId: GATHER_SPACE_ID,
+    guestlist: {},
+    overwrite: true,
+  }
+  const updateResponse = await fetch(
+    'https://api.gather.town/api/setEmailGuestlist',
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'content-type': 'application/json',
+      },
+    },
+  )
+  await updateResponse.json()
+  notify({title: 'All guests removed'})
+}
+
+async function deleteGuestList() {
+  // Open the browser to the Gather dashboard space access page for the current space
+  const url = `https://app.gather.town/dashboard/${GATHER_SPACE_ID.replace(
+    /\\/g,
+    '/',
+  )}/space-access`
+  await browse(url)
 }
 
 await go()

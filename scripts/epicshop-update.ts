@@ -79,6 +79,13 @@ async function updateWorkshopRepos(workshopDirs: Array<string>) {
     await execaCommand('npm show @epic-web/workshop-app version')
   ).stdout.trim()
 
+  // do npm show for the rest of the packages so we trigger a version update on all packages
+  await Promise.all([
+    execaCommand('npm show @epic-web/workshop-cli version'),
+    execaCommand('npm show @epic-web/workshop-presence version'),
+    execaCommand('npm show @epic-web/workshop-utils version'),
+  ])
+
   console.log(`🔍 Updating to version ${version}`)
 
   for (const workshopDir of workshopDirs) {
@@ -107,13 +114,10 @@ async function updateWorkshopRepos(workshopDirs: Array<string>) {
     for (const pkg of pkgs) {
       const pkgPath = path.join(workshopDir, pkg)
       const contents = await readFile(pkgPath, 'utf8')
-      const newContents = contents
-        .replace(/(@epic-web\/workshop-app":\s*")([^"]+)"/, `$1^${version}"`)
-        .replace(/(@epic-web\/workshop-utils":\s*")([^"]+)"/, `$1^${version}"`)
-        .replace(
-          /(@epic-web\/workshop-presence":\s*")([^"]+)"/,
-          `$1^${version}"`,
-        )
+      const newContents = contents.replace(
+        /(@epic-web\/workshop-[^":]+":\s*")([^"]+)"/g,
+        `$1^${version}"`,
+      )
       if (contents === newContents) continue
       await writeFile(pkgPath, newContents)
       changed = true
